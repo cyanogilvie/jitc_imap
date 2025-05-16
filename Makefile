@@ -1,3 +1,5 @@
+DESTDIR=
+PREFIX=/usr/local
 TCLSH_PROG = tclsh8.7
 TESTLIB = libtcllemon.so
 PACKAGE_NAME = tcllemon
@@ -30,6 +32,10 @@ valgrind: binaries libraries
 
 clean:
 	-rm -f $(TESTLIB)
+
+install:
+	mkdir -p $(DESTDIR)$(PREFIX)/lib/jitc_imap0.1
+	cp lempar.c tcllemon.c imap.re imap.tcl imap.y pkgIndex.tcl $(DESTDIR)$(PREFIX)/lib/jitc_imap0.1/
 
 tags:
 	ctags-exuberant --langmap=c:+.re *
