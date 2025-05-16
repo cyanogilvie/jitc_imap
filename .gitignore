@@ -1,0 +1,7 @@
+**/.claude/settings.local.json
+*.swp
+*.so
+tags
+core
+vgcore.*
+tests/traces/last_rx

@@ -1,0 +1,45 @@
+source [file join [file dirname [info script]] common.tcl]
+
+foreach {impl cmd} {
+	prebuilt	tcllemon
+	jitc		capply_tcllemon
+} {
+	test tcllemon_${impl}_args-1.1 "$impl No args" -body { #<<<
+		$cmd
+	} -returnCodes error -errorCode {TCL WRONGARGS} -result {Input file is required (option -i)}
+	#>>>
+	test tcllemon_${impl}_args-1.2 "$impl No template" -body { #<<<
+		$cmd -i $testy
+	} -returnCodes error -errorCode {TCL WRONGARGS} -result {Template file is required (option -T)}
+	#>>>
+	test tcllemon_${impl}_args-1.3 "$impl No input" -body { #<<<
+		$cmd -T lempar.c
+	} -returnCodes error -errorCode {TCL WRONGARGS} -result {Input file is required (option -i)}
+	#>>>
+
+	test tcllemon_${impl}-1.1 "$impl testy" -setup { #<<<
+		set saved	[pwd]
+		cd [file dirname $testy]
+		set debugopts	[if 1 {
+			set debugpath	[::tcltest::makeDirectory debug_$testname]
+			list debug $debugpath
+		}]
+	} -body {
+		$cmd -i $testy -d $tmpdir -q -headervar header -T [file join $srcdir lempar.c]
+		set code	[::tcltest::viewFile [file rootname $testy].c]
+		::tcltest::makeFile $header test.h
+		jitc::capply [list {*}$debugopts options {-Wall -Werror -g -std=c17} filter {jitc::re2c --case-ranges --no-debug-info} include_path $tmpdir code $code] calc {6*7}
+	} -cleanup {
+		cd $saved
+		if {[info exists debugpath]} {::tcltest::removeDirectory [file tail $debugpath]}
+		unset -nocomplain code saved header debugopts debugpath
+		::tcltest::removeFile test.h
+		::tcltest::removeFile test.c
+	} -result 42|1
+	#>>>
+}
+
+::tcltest::cleanupTests
+return
+
+# vim: ft=tcl foldmethod=marker foldmarker=<<<,>>> ts=4 shiftwidth=4 noexpandtab

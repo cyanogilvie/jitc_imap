@@ -1,0 +1,18 @@
+CC=gcc
+TCLSH=tclsh8.7
+NAME=imap_response
+VER=0.1
+
+build:
+	$(TCLSH) gcc.tcl preamble									> test.c
+	echo "#line 1 \"code.c\""									>> test.c
+	cat code.c													>> test.c
+	$(TCLSH) gcc.tcl tclinit "$(NAME)" "$(VER)"					>> test.c
+	gcc -shared -fPIC -Wl,--export-dynamic -o "$(NAME).so" $(shell $(TCLSH) gcc.tcl cflags) test.c $(shell $(TCLSH) gcc.tcl ldflags)
+	$(TCLSH) gcc.tcl package "$(NAME)" "$(VER)"					> pkgIndex.tcl
+
+clean:
+	-rm "$(NAME).so" test.c pkgIndex.tcl
+
+.PHONY: build clean
+

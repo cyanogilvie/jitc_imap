@@ -1,0 +1,1130 @@
+source [file join [file dirname [info script]] common.tcl]
+
+::tcltest::testConstraint has_last_rx [file readable [file join [file dirname [info script]] traces/last_rx]]
+
+test rt-1.1 "List unseen" -body { #<<<
+	replay list_unseen
+} -result [json normalize {
+	//<<<
+	[
+		{
+			"type":     "untagged",
+			"untagged": "OK",
+			"details":  {
+				"text": "Gimap ready for requests from 165.73.138.206 c18mb32109506wmk"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "CAPABILITY",
+			"details":  [
+				"IMAP4rev1",
+				"UNSELECT",
+				"IDLE",
+				"NAMESPACE",
+				"QUOTA",
+				"ID",
+				"XLIST",
+				"CHILDREN",
+				"X-GM-EXT-1",
+				"UIDPLUS",
+				"COMPRESS=DEFLATE",
+				"ENABLE",
+				"MOVE",
+				"CONDSTORE",
+				"ESEARCH",
+				"UTF8=ACCEPT",
+				"LIST-EXTENDED",
+				"LIST-STATUS",
+				"LITERAL-",
+				"SPECIAL-USE",
+				"APPENDLIMIT=35651584"
+			]
+		},
+		{
+			"type":    "tagged",
+			"tag":     "a0001",
+			"state":   "OK",
+			"details": {
+				"text": "rt@rubylaneinc.com authenticated (Success)"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Admin_Job Applicants"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Admin_Job Applicants",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Blog Articles"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Blog Articles",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/CS3 Zenna"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/CS3 Zenna",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/CS_Alerts"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/CS_Alerts",
+				"status":  {
+					"UNSEEN": 524
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/IBG Special request"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/IBG Special request",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Complaint"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Complaint",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Feedback"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Feedback",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Feedback_comment"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Feedback_comment",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Flag"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Flag",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_General"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_General",
+				"status":  {
+					"UNSEEN": 2
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Mentoring"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Mentoring",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Open Request"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Open Request",
+				"status":  {
+					"UNSEEN": 2
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Payment"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Payment",
+				"status":  {
+					"UNSEEN": 1
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Refund"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Refund",
+				"status":  {
+					"UNSEEN": 1
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Shop Help"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Shop Help",
+				"status":  {
+					"UNSEEN": 3
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Shop Review"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Shop Review",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Shop Review_comment"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Shop Review_comment",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Suggestions"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Suggestions",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Suggestions_comment"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Suggestions_comment",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Testimonial"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Testimonial",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lane_Testimonial_comment"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lane_Testimonial_comment",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lux_Concierge"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lux_Concierge",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lux_Feedback"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lux_Feedback",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lux_General"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lux_General",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lux_Marketing"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lux_Marketing",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lux_POP"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lux_POP",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lux_Personal_Shopper"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lux_Personal_Shopper",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lux_Shop Help"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lux_Shop Help",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lux_Suggestions"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lux_Suggestions",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Lux_Trade"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Lux_Trade",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Marketing"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Marketing",
+				"status":  {
+					"UNSEEN": 3
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Paypal_Disputes"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Paypal_Disputes",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Premium Featuring"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Premium Featuring",
+				"status":  {
+					"UNSEEN": 1
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Privacy_issues"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Privacy_issues",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/QA"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/QA",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/QA_comment"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/QA_comment",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/RLGisele"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/RLGisele",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/RXGisele"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/RXGisele",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Ruby_Lane_Reviews"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Ruby_Lane_Reviews",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Sales Leads"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Sales Leads",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Tech"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Tech",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Tech_Site_Issues"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Tech_Site_Issues",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/Tech_Site_Issues_comment"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/Tech_Site_Issues_comment",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/cs 20 Rob"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/cs 20 Rob",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/cs30 Sunny"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/cs30 Sunny",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "LIST",
+			"details":  {
+				"flags":     [
+					"\\HasNoChildren"
+				],
+				"delimiter": "/",
+				"mailbox":   "RT/cs67 Charles"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "STATUS",
+			"details":  {
+				"mailbox": "RT/cs67 Charles",
+				"status":  {
+					"UNSEEN": 0
+				}
+			}
+		},
+		{
+			"type":    "tagged",
+			"tag":     "a0002",
+			"state":   "OK",
+			"details": {
+				"text": "Success"
+			}
+		},
+		{
+			"type":     "untagged",
+			"untagged": "BYE",
+			"details":  {
+				"text": "LOGOUT Requested"
+			}
+		},
+		{
+			"type":    "tagged",
+			"tag":     "a0003",
+			"state":   "OK",
+			"details": {
+				"text": "73 good day (Success)"
+			}
+		}
+	]
+	//>>>
+}]
+#>>>
+test rt-2.1 "Fetch with header list" -setup { #<<<
+	::jitc_imap::enable_trace "parse $testname: "
+} -body {
+	replay fetch_header
+} -cleanup {
+	::jitc_imap::disable_trace
+} -result [json normalize {
+	//<<<
+	[
+		{
+			"type":     "untagged",
+			"untagged": "FETCH",
+			"details":  {
+				"msgseq": 813,
+				"msg":    {
+					"X-GM-MSGID":         1831716130626498326,
+					"X-GM-LABELS":        [
+						"\\Starred",
+						"RT/CS_Alerts"
+					],
+					"UID":                258457,
+					"FLAGS":              [
+						"\\Flagged"
+					],
+					"ENVELOPE":           {
+						"date":        "Sat, 10 May 2025 07:03:46 +0000",
+						"subject":     "RL_LOG: helpdesk Authnet Create Transaction for 2902545 - $90.00, was not approved: 2 - Transaction request was declined, so no credit was raised.",
+						"from":        [
+							{
+								"name":         "nsadmin.80@pod",
+								"obsolete_adl": null,
+								"mailbox":      "nsadmin",
+								"host":         "pod.rubylane.com"
+							}
+						],
+						"sender":      [
+							{
+								"name":         "nsadmin.80@pod",
+								"obsolete_adl": null,
+								"mailbox":      "nsadmin",
+								"host":         "pod.rubylane.com"
+							}
+						],
+						"reply-to":    [
+							{
+								"name":         "nsadmin.80@pod",
+								"obsolete_adl": null,
+								"mailbox":      "nsadmin",
+								"host":         "pod.rubylane.com"
+							}
+						],
+						"to":          [
+							{
+								"name":         null,
+								"obsolete_adl": null,
+								"mailbox":      "webalert",
+								"host":         "rubylane.com"
+							}
+						],
+						"cc":          null,
+						"bcc":         null,
+						"in-reply-to": null,
+						"message-id":  "<01000196b901d236-e87a69dc-b64a-405a-8c45-49ded9e42bc0-000000@email.amazonses.com>"
+					},
+					"BODY[HEADER.FIELDS (Message-Id)]": "Message-ID: <01000196b901d236-e87a69dc-b64a-405a-8c45-49ded9e42bc0-000000@email.amazonses.com>\r\n\r\n"
+				}
+			}
+		}
+	]
+	//>>>
+}]
+#>>>
+test rt_last-1.1 "Reparse manual test" -constraints has_last_rx -setup { #<<<
+	::jitc_imap::enable_trace "parse $testname: "
+} -body {
+	json valid [replay last_rx]
+} -cleanup {
+	::jitc_imap::disable_trace
+} -result 1
+#>>>
+
+::tcltest::cleanupTests
+return
+
+# vim: ft=tcl foldmethod=marker foldmarker=<<<,>>> ts=4 shiftwidth=4 noexpandtab
+
