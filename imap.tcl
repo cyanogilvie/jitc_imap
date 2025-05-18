@@ -206,7 +206,7 @@ namespace eval ::jitc_imap {
 				set remain	[expr {max(0, $timeout_horizon - [clock microseconds]/1e6)}]
 				switch -exact -- $state {
 					{server greeting}					{aio coro_vwait [namespace which -variable state] $remain}
-					Logout								{throw [list IMAP REFUSED $resp_text_code] $resp_text}
+					Logout								{throw [list JITC_IMAP REFUSED $resp_text_code] $resp_text}
 					{Not Authenticated}	- Authenticed	break
 					default								{error "Unexpected state: ($state)"}
 				}
@@ -240,11 +240,13 @@ namespace eval ::jitc_imap {
 
 			try {
 				while 1 {
+					set feed	$chunk
+					set chunk	{}
 					#log debug "Sending chunk ([string length $chunk]) bytes to parse_response"
-					statemachine [parse_response rxbuf $chunk[set chunk {}]]
+					statemachine [parse_response rxbuf $feed]
 				}
-			} trap {IMAP MORE} {} {
-				#log error "Trapped IMAP MORE, returning from _readable"
+			} trap {JITC_IMAP MORE} {} {
+				#log error "Trapped JITC_IMAP MORE, returning from _readable"
 				if {![info exists sock]} {
 					if {[array size cmdwait]} {
 						#log notice "Socket closed, resolving all waiting commands as errors"
@@ -254,6 +256,14 @@ namespace eval ::jitc_imap {
 						}
 					}
 				}
+			} trap {JITC_IMAP PARSE_FAILED}		{r o} - \
+			  trap {JITC_IMAP SYNTAX_ERROR}		{r o} - \
+			  trap {JITC_IMAP STACK_OVERFLOW}	{r o} {
+				log error "$r ([dict get $o -errorcode]):\nrxbuf: $rxbuf\nfeed: [binary encode hex $feed]"
+				return -options $o $r
+			} on error {r o} {
+				log error "([dict get $o -errorcode]) Error parsing response: $r\nrxbuf: $rxbuf\nfeed: [binary encode hex $feed]"
+				return -options $o $r
 			}
 		}
 

@@ -30,17 +30,17 @@ void breakpoint() {};
 	X(MINUSONE,				"-1") \
 	X(ZEROSTRING,			"\"\"") \
 	X(END_PLUS_ONE,			"end+1") \
-	X(MORE_EXCEPTION,			"-code 1 -errorcode IMAP\\ MORE -level 0") \
+	X(MORE_EXCEPTION,			"-code 1 -errorcode JITC_IMAP\\ MORE -level 0") \
 	X(PARSE_FAILED,				"Parse failed") \
-	X(PARSE_FAILED_EXCEPTION,	"-code 1 -errorcode IMAP\\ PARSE_FAILED -level 0") \
+	X(PARSE_FAILED_EXCEPTION,	"-code 1 -errorcode JITC_IMAP\\ PARSE_FAILED -level 0") \
 	X(STACK_OVERFLOW,			"Parse stack overflow") \
-	X(STACK_OVERFLOW_EXCEPTION,	"-code 1 -errorcode IMAP\\ STACK_OVERFLOW -level 0") \
+	X(STACK_OVERFLOW_EXCEPTION,	"-code 1 -errorcode JITC_IMAP\\ STACK_OVERFLOW -level 0") \
 	X(SYNTAX_ERROR,				"Parse syntax error") \
-	X(SYNTAX_ERROR_EXCEPTION,	"-code 1 -errorcode IMAP\\ SYNTAX_ERROR -level 0") \
+	X(SYNTAX_ERROR_EXCEPTION,	"-code 1 -errorcode JITC_IMAP\\ SYNTAX_ERROR -level 0") \
 	X(LIST_MAILBOX,			"list_mailbox") \
 	X(APPLY,				"apply") \
 	X(BUILD_LIST,			"{t val} {string cat ( [join [json lmap e $val {uplevel 1 [list quote $t $e]}]] )}") \
-	X(IMAP,					"IMAP") \
+	X(JITC_IMAP,			"JITC_IMAP") \
 	X(TRAILING_INPUT,		"TRAILING_INPUT") \
 	X(NONE,					"none") \
 	X(UNTAGGED,				"untagged") \
@@ -744,7 +744,7 @@ static void update_lex_state_string_rep(Tcl_Obj* obj) //<<<
 			Tcl_NewStringObj(Tcl_DStringValue(&state->tokbuf), Tcl_DStringLength(&state->tokbuf))));
 
 	TEST_OK_LABEL(finally, code, JSON_Set(interp, s, lit[L_LITLEN],		Tcl_NewWideIntObj(state->litlen)));
-	TEST_OK_LABEL(finally, code, JSON_Set(interp, s, lit[L_LITBIN],		Tcl_NewBooleanObj(state->litbin)));
+	TEST_OK_LABEL(finally, code, JSON_Set(interp, s, lit[L_LITBIN],		lit[state->litbin ? L_JSON_TRUE : L_JSON_FALSE]));
 
 	int	slen;
 	const char*	str = Tcl_GetStringFromObj(s, &slen);
@@ -868,7 +868,7 @@ static int IMAP_GetLexStateFromObj(Tcl_Interp* interp, Tcl_Obj* obj, struct lex_
 					Tcl_Obj**	subv;
 
 					TEST_OK_LABEL(finally, code, JSON_Extract(interp, obj, kv[i], &val));
-					TEST_OK_LABEL(finally, code, JSON_Keys(interp, obj, val, &tmp));
+					TEST_OK_LABEL(finally, code, JSON_Keys(interp, val, NULL, &tmp));
 					TEST_OK_LABEL(finally, code, Tcl_ListObjGetElements(interp, tmp, &subc, &subv));
 
 					for (int subi=0; subi<subc; subi++) {
@@ -1077,8 +1077,9 @@ OBJCMD(parse_response) //<<<
 		<post>	">"								{ EMIT(RANGLE,					lit[L_TOK_rangle]);					continue; }
 		<post>	","		=> plain				{ EMIT(COMMA,					lit[L_TOK_comma]);					continue; }
 		<post>	":"		=> plain				{ EMIT(COLON,					lit[L_TOK_colon]);					continue; }
-		<plain>	"="		=> plain				{ EMIT(EQUALS,					lit[L_TOK_equals]);					continue; }
+		<post>	"("		=> plain				{ EMIT(LPAREN,					lit[L_TOK_lparen]);					continue; }
 
+		<plain>	"="		=> plain				{ EMIT(EQUALS,					lit[L_TOK_equals]);					continue; }
 		<plain>	"("								{ EMIT(LPAREN,					lit[L_TOK_lparen]);					continue; }
 		<plain,post>	"["			=> plain	{ EMIT(LBRACKET,				lit[L_TOK_lbracket]);				continue; }
 		<plain,post>	"<"			=> plain	{ EMIT(LANGLE,					lit[L_TOK_langle]);					continue; }
@@ -1307,7 +1308,7 @@ OBJCMD(finalize) // Not required for cleanup, but checks that no partial parse s
 		if (buflen>1) {
 			if (code == TCL_OK) {
 				Tcl_SetObjErrorCode(interp, Tcl_NewListObj(3, (Tcl_Obj*[]){
-					lit[L_IMAP],
+					lit[L_JITC_IMAP],
 					lit[L_TRAILING_INPUT],
 					state->buf
 				}));
