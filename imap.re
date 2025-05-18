@@ -1489,7 +1489,7 @@ OBJCMD(quote) //<<<
 				break;
 			}
 			//>>>
-			case QT_list_mailbox: { //<<<
+			case QT_list_mailbox: { // TODO: escape as UTF-7 if not in UTF-8 mode (UTF8=ACCEPT enabled)? <<<
 				TEST_OK_LABEL(finally, code, JSON_Get(interp, val, NULL, &strval));
 
 				/*!types:re2c:quote_list_mailbox */
@@ -1567,7 +1567,7 @@ OBJCMD(log_chan) // Return a readable Tcl channel handle that receives the log m
 	FILE*	f = NULL;
 
 	enum {A_cmd, A_PREFIX, A_objc};
-	CHECK_ARGS_LABEL(finally, code, "");
+	CHECK_ARGS_LABEL(finally, code, "prefix");
 
 	enum {PIPE_READ, PIPE_WRITE};
 	int	pipefd[2] = {-1, -1};
@@ -1616,6 +1616,33 @@ finally:
 		close(pipefd[PIPE_WRITE]);
 		pipefd[PIPE_WRITE] = -1;
 	}
+	return code;
+}
+
+//>>>
+OBJCMD(log_stderr) // Configure the parser to log traces directly to stderr <<<
+{
+	int			code = TCL_OK;
+
+	enum {A_cmd, A_PREFIX, A_objc};
+	CHECK_ARGS_LABEL(finally, code, "prefix");
+
+	if (yyTraceFILE && yyTraceFILE != stderr && yyTraceFILE != stdout) {
+		if (-1 == fclose(yyTraceFILE)) THROW_POSIX_LABEL(finally, code, "fclose");
+	}
+
+	if (trace_prefix) {
+		ckfree(trace_prefix);
+		trace_prefix = NULL;
+	}
+
+	int prefix_len = 0;
+	const char* prefix = Tcl_GetStringFromObj(objv[A_PREFIX], &prefix_len);
+	trace_prefix = ckalloc(prefix_len+1);
+	memcpy(trace_prefix, prefix, prefix_len+1);
+	parse_response_tokTrace(stderr, trace_prefix);
+
+finally:
 	return code;
 }
 

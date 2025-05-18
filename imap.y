@@ -391,11 +391,12 @@ header_list_inner(A) ::= astring(B).						{ SET(A, Tcl_NewListObj(1, &B)); }
 header_list_inner(A) ::= header_list_inner(B) astring(H).	{ MOVE(B, A); UNSHARE(A);	TEST_OK_LABEL(finally, code, Tcl_ListObjAppendElement(interp, A, H)); }
 
 utf7_astring_list(A) ::= LPAREN utf7_astrings(B) RPAREN.	{ MOVE(B, A); }
-utf7_astrings(A) ::= utf7_astring(B).						{ SET(A, L_JSON_EMPTY_ARR);	JSON_SET(A, L_END_PLUS_ONE, B); }
-utf7_astrings(A) ::= utf7_astrings(B) utf7_astring(C).		{ MOVE(B, A);				JSON_SET(A, L_END_PLUS_ONE, C); }
+utf7_astrings(A) ::= .										{ SET(A, L_JSON_EMPTY_ARR); }
+utf7_astrings(A) ::= utf7_astring(B).						{ SET_JSON_ARR(A, B); }
+utf7_astrings(A) ::= utf7_astrings(B) utf7_astring(C).		{ MOVE(B, A); JSON_SET(A, L_END_PLUS_ONE, C); }
 utf7_astring(A) ::= astring(B).								{
 	// TODO: Decode UTF-7
-	MOVE(B, A); 
+	SET(A, JSTR(B));
 }
 
 /* Envelope parser rules */

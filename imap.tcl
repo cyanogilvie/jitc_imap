@@ -16,8 +16,8 @@ namespace eval ::jitc_imap {
 
 	variable cdef	[apply [list {} { # Send the source through tcllemon and re2c <<<
 		variable dir	[file dirname [file normalize [info script]]]
-
-		set debug	0
+		variable debug
+		if {![info exists debug]} {set debug 0}
 
 		variable cdef {
 			options	{-Wall -Werror -std=c17 -D_POSIX_C_SOURCE=200809L -g}
@@ -34,7 +34,7 @@ namespace eval ::jitc_imap {
 			file link -symbolic imap.re		[file join $dir imap.re]
 
 			::jitc::capply [list options {-Wall -Werror -std=c17} code [chantricks readfile [file join $dir tcllemon.c]]] \
-				tcllemon \
+				tcllemon -l \
 					-q \
 					-allow_conflicts \
 					-d $tmpdir \
@@ -81,6 +81,7 @@ namespace eval ::jitc_imap {
 	jitc::bind [namespace current]::finalize		$cdef finalize
 	jitc::bind [namespace current]::quote			$cdef quote
 	jitc::bind [namespace current]::log_chan		$cdef log_chan
+	jitc::bind [namespace current]::log_stderr		$cdef log_stderr
 	jitc::bind [namespace current]::disable_log		$cdef disable_log
 
 	proc enable_trace prefix { #<<<
@@ -303,8 +304,8 @@ namespace eval ::jitc_imap {
 										}
 									}
 								} r o
-								dict incr o -level 2
-								dict set o -errorinfo {}
+								#dict incr o -level 2
+								#dict set o -errorinfo {}
 								set cmdwait([json get $resp tag]) [list $r $o]
 							}
 							continue {
@@ -320,7 +321,7 @@ namespace eval ::jitc_imap {
 						#>>>
 					}
 					Logout { #<<<
-						log debug "State $state: [json pretty $resp]"
+						#log debug "State $state: [json pretty $resp]"
 						switch -exact -- [json get $resp type] {
 							untagged {
 								log error "Unexpected untagged response in Logout state: [json pretty $resp]"
@@ -473,7 +474,83 @@ namespace eval ::jitc_imap {
 		method has_cap cap { expr {$cap in $capability} }
 		method id {} {format a%04d [incr idseq]}
 		method writeline cmd { puts -nonewline $sock "[set id [my id]] $cmd\r\n"; set id }
-		method req cmd { my wait [my writeline $cmd] }
+		method req {cmd {untagged_handlers {}}} { #<<<
+			set tag	[my writeline $cmd]
+			if {$untagged_handlers eq {}} {return [my wait $tag]}
+
+			if {[llength $untagged_handlers] % 3} {error "Invalid handlers"}
+
+			set handler_names	{}
+			set handler_vars	{}
+			set handler_scripts	{}
+			foreach {name detailsvar script} $untagged_handlers {
+				if {[info exists $detailsvar]} {error "Duplicate untagged handler for $name: $detailsvar"}
+				lappend handler_names $name
+				dict set handler_vars		$name $detailsvar
+				dict set handler_scripts	$name $script
+				my on $name [info coroutine] untagged $name
+			}
+
+			set timeout_afterid	[after [expr {int($req_timeout * 1000)}] [list [info coroutine] timeout]]
+			set fqvar			[namespace which -variable cmdwait]($tag)
+			set writehandler	[list [info coroutine] gotresp]
+
+			set cleanup	[list apply {{self fqvar afterid writehandler handler_names args} {
+				after cancel $afterid
+				trace remove variable $fqvar write $writehandler
+				if {[info object isa object $self]} {
+					foreach name $handler_names {$self off $name}
+				}
+			}} [self] $fqvar $timeout_afterid $writehandler $handler_names]
+
+			trace add command [info coroutine] delete $cleanup
+			trace add variable $fqvar write $writehandler
+			try {
+				set yo	{-level 0}
+				set yr	{}
+				while 1 {
+					set args	[lassign [yieldto return -options $yo $yr] ev]
+					set yo		{-level 0}
+					set yr		{}
+					switch -exact -- $ev {
+						gotresp {
+							lassign $cmdwait($tag) r o
+							unset cmdwait($tag)
+							break
+						}
+
+						timeout {
+							catch {throw [list JITC_IMAP TIMEOUT $tag] "Request timed out"} r o
+							break
+						}
+
+						untagged {
+							catch {
+								parse_args $args {
+									name	{-required}
+									details {-required}
+								}
+								uplevel 1 [list set [dict get $handler_vars $name] $details]
+								uplevel 1 [dict get $handler_scripts $name]
+							} yr yo	;# Arrange for the yeildto to rethrow our exception to our caller (statemachine method) if there was one
+						}
+
+						default {
+							catch {error "Unexpected wakeup event: ($ev) with args: ($args)"} r o
+							break
+						}
+					}
+				}
+			} finally {
+				trace remove command [info coroutine] delete $cleanup
+				{*}$cleanup
+			}
+			after 0 [list [info coroutine]]
+			yield
+			return -options $o $r
+		}
+
+		#>>>
 		method wait id { #<<<
 			lassign [aio coro_vwait [namespace which -variable cmdwait]($id) $req_timeout] r o
 			unset -nocomplain cmdwait($id)
