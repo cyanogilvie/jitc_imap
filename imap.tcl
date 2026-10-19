@@ -19,8 +19,11 @@ namespace eval ::jitc_imap {
 		variable debug
 		if {![info exists debug]} {set debug 0}
 
+		# -O0: jitc's slimcc/mir backend takes over 12 seconds to build this
+		# at -O2.  jitc is here to run lemon and re2c over the IMAP grammar,
+		# and the parser's speed doesn't matter next to network latency
 		variable cdef {
-			options	{-Wall -Werror -std=c17 -D_POSIX_C_SOURCE=200809L -g}
+			options	{-Wall -Werror -std=c17 -D_POSIX_C_SOURCE=200809L -g -O0}
 			package	{rl_json	0.15.3}
 			package	{dedup		0.9.5}
 		}
@@ -33,7 +36,7 @@ namespace eval ::jitc_imap {
 			file link -symbolic code.y		[file join $dir imap.y]
 			file link -symbolic imap.re		[file join $dir imap.re]
 
-			::jitc::capply [list options {-Wall -Werror -std=c17} code [chantricks readfile [file join $dir tcllemon.c]]] \
+			::jitc::capply [list options {-Wall -Werror -std=c17 -O0} code [chantricks readfile [file join $dir tcllemon.c]]] \
 				tcllemon -l \
 					-q \
 					-allow_conflicts \

@@ -61,7 +61,7 @@ Tcl_WideInt	n1, n2, d1, d2;
 #define GETRAT(o, n, d) \
 do { \
 	Tcl_Obj** ov; \
-	int oc; \
+	Tcl_Size oc; \
 	TEST_OK_LABEL(finally, parser_code, Tcl_ListObjGetElements(interp, o, &oc, &ov)); \
 	if (oc != 2) THROW_ERROR_LABEL(finally, parser_code, "Bad rat"); \
 	TEST_OK_LABEL(finally, parser_code, Tcl_GetWideIntFromObj(interp, ov[0], &n)); \
@@ -107,7 +107,7 @@ static void simplify(Tcl_WideInt* n, Tcl_WideInt* d) //<<<
 
 topexpr ::= expr(E). {
 	Tcl_Obj** ov;
-	int oc;
+	Tcl_Size oc;
 	TEST_OK_LABEL(finally, parser_code, Tcl_ListObjGetElements(interp, E, &oc, &ov));
 	if (oc != 2) THROW_ERROR_LABEL(finally, parser_code, "Bad rat");
 	Tcl_SetObjResult(interp, Tcl_ObjPrintf("%s|%s",

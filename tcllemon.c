@@ -1964,7 +1964,7 @@ OBJCMD(tcllemon) //<<<
 
   if (lem.errorcnt || lem.nconflict) {
     Tcl_Obj** ev;
-    int ec = 0;
+    Tcl_Size ec = 0;
     TEST_OK_LABEL(finally, code, Tcl_ListObjGetElements(interp, g_errors, &ec, &ev));
     replace_tclobj(&tmp, Tcl_ConcatObj(ec, ev));
 

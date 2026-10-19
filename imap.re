@@ -614,7 +614,7 @@ static int deserialise_parser_state(Tcl_Interp* interp, Tcl_Obj* obj, struct yyP
 	p->yyerrcnt = tmpwide;
 	#endif
 
-	int			sc;
+	Tcl_Size			sc;
 	Tcl_Obj**	sv = NULL;
 	TEST_OK_LABEL(finally, code, JSON_Get(interp, obj, lit[L_YYSTACK], &tmp));
 	TEST_OK_LABEL(finally, code, Tcl_ListObjGetElements(interp, tmp, &sc, &sv));
@@ -625,7 +625,7 @@ static int deserialise_parser_state(Tcl_Interp* interp, Tcl_Obj* obj, struct yyP
 			YYSTACK_MINOR,
 			YYSTACK_size
 		};
-		int			ec;
+		Tcl_Size	ec;
 		Tcl_Obj**	ev = NULL;
 		TEST_OK_LABEL(finally, code, Tcl_ListObjGetElements(interp, sv[i], &ec, &ev));
 		if (ec != YYSTACK_size) THROW_PRINTF_LABEL(finally, code, "Invalid yystack entry %d", i);
@@ -746,7 +746,7 @@ static void update_lex_state_string_rep(Tcl_Obj* obj) //<<<
 	TEST_OK_LABEL(finally, code, JSON_Set(interp, s, lit[L_LITLEN],		Tcl_NewWideIntObj(state->litlen)));
 	TEST_OK_LABEL(finally, code, JSON_Set(interp, s, lit[L_LITBIN],		lit[state->litbin ? L_JSON_TRUE : L_JSON_FALSE]));
 
-	int	slen;
+	Tcl_Size	slen;
 	const char*	str = Tcl_GetStringFromObj(s, &slen);
 	Tcl_InitStringRep(obj, str, slen);
 
@@ -778,9 +778,10 @@ static int IMAP_GetLexStateFromObj(Tcl_Interp* interp, Tcl_Obj* obj, struct lex_
 			THROW_ERROR_LABEL(finally, code, "Expected lex state");
 
 		int			tmpint;
+		Tcl_Size		tmplen;
 		Tcl_WideInt	tmpwide;
 		const char*	tmpstr = NULL;
-		int			kc;
+		Tcl_Size			kc;
 		Tcl_Obj**	kv = NULL;
 
 		TEST_OK_LABEL(finally, code, JSON_Keys(interp, obj, NULL, &tmp));
@@ -844,7 +845,7 @@ static int IMAP_GetLexStateFromObj(Tcl_Interp* interp, Tcl_Obj* obj, struct lex_
 
 				case KT_BUF:
 				{
-					int				len;
+					Tcl_Size				len;
 					const uint8_t*	bytes = Tcl_GetBytesFromObj(interp, val, &len);
 					if (bytes == NULL) THROW_ERROR_LABEL(finally, code, "buf is not a bytearray");
 					if (len < 1 || bytes[len-1] != 0) THROW_ERROR_LABEL(finally, code, "buf lacks sentinel");
@@ -853,8 +854,8 @@ static int IMAP_GetLexStateFromObj(Tcl_Interp* interp, Tcl_Obj* obj, struct lex_
 				}
 
 				case KT_DSTRING:
-					tmpstr = Tcl_GetStringFromObj(val, &tmpint);
-					Tcl_DStringAppend(dest[key], tmpstr, tmpint);
+					tmpstr = Tcl_GetStringFromObj(val, &tmplen);
+					Tcl_DStringAppend(dest[key], tmpstr, tmplen);
 					break;
 
 				case KT_PARSERSTATE:
@@ -864,7 +865,7 @@ static int IMAP_GetLexStateFromObj(Tcl_Interp* interp, Tcl_Obj* obj, struct lex_
 
 				case KT_OBJDICT:
 				{
-					int			subc;
+					Tcl_Size			subc;
 					Tcl_Obj**	subv;
 
 					TEST_OK_LABEL(finally, code, JSON_Extract(interp, obj, kv[i], &val));
@@ -982,7 +983,7 @@ OBJCMD(parse_response) //<<<
 	int					code = TCL_OK;
 	Tcl_Obj*			stateobj = NULL;
 	struct lex_state	*state = NULL;
-	int					buflen, chunklen;
+	Tcl_Size			buflen, chunklen;
 
 	enum {A_cmd, A_STATEVAR, A_CHUNK, A_objc};
 	CHECK_ARGS_LABEL(finally, code, "statevar chunk");
@@ -1287,7 +1288,7 @@ OBJCMD(finalize) // Not required for cleanup, but checks that no partial parse s
 	int					code = TCL_OK;
 	Tcl_Obj*			stateobj = NULL;
 	struct lex_state*	state = NULL;
-	int					buflen = 0;
+	Tcl_Size					buflen = 0;
 
 	enum {A_cmd, A_STATEVAR, A_objc};
 	CHECK_ARGS_LABEL(finally, code, "statevar");
@@ -1355,7 +1356,7 @@ OBJCMD(quote) //<<<
 	enum {A_cmd, A_TYPE, A_VAL, A_objc};
 	CHECK_ARGS_LABEL(finally, code, "type value");
 
-	int				size;
+	Tcl_Size				size;
 	const uint8_t*	str = NULL;
 	const uint8_t*	cur = NULL;
 	const uint8_t*	lim = NULL;
@@ -1407,7 +1408,7 @@ OBJCMD(quote) //<<<
 
 					<quote_string> CHAR8+ end {
 						// Write as a non-synchronizing literal
-						Tcl_SetObjResult(interp, Tcl_ObjPrintf("{%d+}\r\n%*s\r\n", size, size, str));
+						Tcl_SetObjResult(interp, Tcl_ObjPrintf("{%d+}\r\n%*s\r\n", (int)size, (int)size, str));
 						goto finally;
 					}
 
@@ -1596,7 +1597,7 @@ OBJCMD(log_chan) // Return a readable Tcl channel handle that receives the log m
 	f = fdopen(pipefd[PIPE_WRITE], "w");
 	if (f == NULL) THROW_POSIX_LABEL(finally, code, "fdopen");
 	pipefd[PIPE_WRITE] = -1;	// fd is owned by the FILE*
-	int prefix_len = 0;
+	Tcl_Size prefix_len = 0;
 	const char* prefix = Tcl_GetStringFromObj(objv[A_PREFIX], &prefix_len);
 	trace_prefix = ckalloc(prefix_len+1);
 	memcpy(trace_prefix, prefix, prefix_len+1);
@@ -1637,7 +1638,7 @@ OBJCMD(log_stderr) // Configure the parser to log traces directly to stderr <<<
 		trace_prefix = NULL;
 	}
 
-	int prefix_len = 0;
+	Tcl_Size prefix_len = 0;
 	const char* prefix = Tcl_GetStringFromObj(objv[A_PREFIX], &prefix_len);
 	trace_prefix = ckalloc(prefix_len+1);
 	memcpy(trace_prefix, prefix, prefix_len+1);

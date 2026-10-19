@@ -63,7 +63,7 @@ When making changes:
 
 ## Dependencies
 
-- Tcl 8.7
+- Tcl 8.7 or 9
 - jitc (JIT Compiler for Tcl)
 - chantricks Tcl package
 - rl_json Tcl package (version 0.15.3 or later)
