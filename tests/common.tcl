@@ -72,7 +72,7 @@ proc replay {rxtrace {chunksize 0}} { #<<<
 					set resp	[::jitc_imap::parse_response state $chunk[set chunk {}]]
 					json set res end+1 $resp
 				}
-			} trap {IMAP MORE} {} continue
+			} trap {JITC_IMAP MORE} {} continue
 		}
 	}
 

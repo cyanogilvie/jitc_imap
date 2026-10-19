@@ -197,6 +197,7 @@ void breakpoint() {};
 	X(TOK_SIZE,					"SIZE") \
 	X(TOK_STATUS,				"STATUS") \
 	X(TOK_TAG,					"TAG") \
+	X(TOK_TEXT_SECTION,			"TEXT") \
 	X(TOK_TRYCREATE,			"TRYCREATE") \
 	X(TOK_UIDNEXT,				"UIDNEXT") \
 	X(TOK_UIDNOTSTICKY,			"UIDNOTSTICKY") \
@@ -1163,7 +1164,7 @@ OBJCMD(parse_response) //<<<
 		<plain>	'SIZE'					=> post	{ EMIT(SIZE,					lit[L_TOK_SIZE]);					continue; }
 		<plain>	'STATUS'				=> post	{ EMIT(STATUS,					lit[L_TOK_STATUS]);					continue; }
 		<plain> 'TAG'					=> post	{ EMIT(TAG,						lit[L_TOK_TAG]);					continue; }
-//		<plain>	'TEXT'					=> post	{ EMIT(TEXT,					lit[L_TOK_TEXT]);					continue; }
+		<plain>	'TEXT'					=> post	{ EMIT(TEXT_SECTION,			lit[L_TOK_TEXT_SECTION]);			continue; }	// TEXT (the free text token) is a different thing
 		<plain>	'TRYCREATE'				=> post	{ EMIT(TRYCREATE,				lit[L_TOK_TRYCREATE]);				continue; }
 		<plain>	'UID'					=> post	{ EMIT(UID,						lit[L_TOK_UID]);					continue; }
 		<plain>	'UIDNEXT'				=> post	{ EMIT(UIDNEXT,					lit[L_TOK_UIDNEXT]);				continue; }
@@ -1189,6 +1190,9 @@ OBJCMD(parse_response) //<<<
 		<plain>	flag_keyword	=> post	{ EMIT(FLAG_KEYWORD,	DEDUP(tok,cur));	continue; }
 		<plain>	BS "*"			=> post	{ EMIT(FLAG_STAR,		DEDUP(tok,cur));	continue; }
 
+		// A partial FETCH's origin: BODY[...]<0>.  ">" isn't an atom-special, so on its
+		// own the longest match would make "0>" an atom
+		<plain>	@s number @e ">"	=> post	{ EMIT(NUMBER,			DEDUP(s,e)); EMIT(RANGLE, lit[L_TOK_rangle]);	continue; }
 		<plain>	number			=> post	{ EMIT(NUMBER,			DEDUP(tok,cur));	continue; }
 		<plain>	atom			=> post	{ EMIT(ATOM,			DEDUP(tok,cur));	continue; }
 
@@ -1216,7 +1220,8 @@ OBJCMD(parse_response) //<<<
 			cur += take;
 			if (cur - tok == state->litlen) {
 				state->cond = yycpost;
-				EMIT(LITERAL_DATA, state->litbin ? Tcl_NewByteArrayObj(tok, cur-tok) : Tcl_NewStringObj((const char*)tok, cur-tok));
+				// Octets either way: the grammar decides whether they are text (string) or message data (octets)
+				EMIT(state->litbin ? LITERAL8_DATA : LITERAL_DATA, Tcl_NewByteArrayObj(tok, cur-tok));
 				continue;
 			}
 

@@ -1,0 +1,103 @@
+source [file join [file dirname [info script]] common.tcl]
+
+# Literals carry octets.  The message data items of a FETCH (BODY[...],
+# BINARY[...], RFC822, RFC822.HEADER, RFC822.TEXT) keep them as octets: a
+# value whose characters are all <= U+00FF, one per octet.  Everywhere else a
+# literal is text (a mailbox name, an envelope field), decoded from UTF-8.
+
+proc parse_all resp { # Parse the responses in $resp (octets), returning a JSON array of them <<<
+	set res		{[]}
+	set chunk	$resp
+	try {
+		while 1 {
+			json set res end+1 [::jitc_imap::parse_response state $chunk[set chunk {}]]
+		}
+	} trap {JITC_IMAP MORE} {} {}
+	set res
+}
+
+#>>>
+proc literal octets { # An IMAP literal of $octets <<<
+	string cat "{[string length $octets]}\r\n" $octets
+}
+
+#>>>
+proc octets_of str { # The code points of $str, as hex, to compare octets exactly <<<
+	join [lmap c [split $str {}] {format %02X [scan $c %c]}] { }
+}
+
+#>>>
+
+set utf8	[encoding convertto utf-8 "Inc. ® café ’"]
+set latin1	[encoding convertto iso8859-1 "café"]	;# not valid UTF-8
+
+test literals-1.1 {A BODY[] literal is the message's octets} -body { #<<<
+	set res	[parse_all "* 1 FETCH (UID 7 BODY\[\] [literal $utf8])\r\n"]
+	octets_of [json get $res 0 details msg {BODY[]}]
+} -result [octets_of $utf8]
+#>>>
+test literals-1.2 {Octets that aren't UTF-8 come through exactly} -body { #<<<
+	set res	[parse_all "* 1 FETCH (UID 7 BODY\[TEXT\] [literal $latin1])\r\n"]
+	octets_of [json get $res 0 details msg {BODY[TEXT]}]
+} -result [octets_of $latin1]
+#>>>
+test literals-1.3 {BODY[HEADER] with a partial range, BODY.PEEK, RFC822 items} -body { #<<<
+	set res	[parse_all [string cat \
+		"* 1 FETCH (BODY\[HEADER\]<0> [literal $utf8] RFC822 [literal $utf8]" \
+		" RFC822.HEADER [literal $utf8] RFC822.TEXT [literal $utf8])\r\n" \
+	]]
+	lmap k {BODY[HEADER]<0> RFC822 RFC822.HEADER RFC822.TEXT} {
+		expr {[json get $res 0 details msg $k] eq $utf8}
+	}
+} -result {1 1 1 1}
+#>>>
+test literals-1.4 {BINARY[] literal8 is octets} -body { #<<<
+	set res	[parse_all "* 1 FETCH (BINARY\[1\] ~[literal $latin1])\r\n"]
+	octets_of [json get $res 0 details msg {BINARY[1]}]
+} -result [octets_of $latin1]
+#>>>
+test literals-1.5 {A quoted string as message data gives its octets} -body { #<<<
+	set res	[parse_all "* 1 FETCH (BODY\[TEXT\] \"caf\xc3\xa9\")\r\n"]
+	octets_of [json get $res 0 details msg {BODY[TEXT]}]
+} -result [octets_of [encoding convertto utf-8 "café"]]
+#>>>
+test literals-1.6 {A NIL message data item is null} -body { #<<<
+	set res	[parse_all "* 1 FETCH (BODY\[TEXT\] NIL)\r\n"]
+	json type $res 0 details msg {BODY[TEXT]}
+} -result null
+#>>>
+test literals-1.7 {A literal message split across reads} -body { #<<<
+	set resp	"* 1 FETCH (BODY\[\] [literal $utf8])\r\n"
+	set res		{[]}
+	unset -nocomplain state
+	foreach chunk [list [string range $resp 0 20] [string range $resp 21 end]] {
+		try {
+			while 1 {
+				json set res end+1 [::jitc_imap::parse_response state $chunk[set chunk {}]]
+			}
+		} trap {JITC_IMAP MORE} {} {}
+	}
+	octets_of [json get $res 0 details msg {BODY[]}]
+} -result [octets_of $utf8]
+#>>>
+
+test literals-2.1 {An envelope subject sent as a literal is decoded text} -body { #<<<
+	set subject	[encoding convertto utf-8 "Résumé ’"]
+	set res	[parse_all [string cat \
+		"* 1 FETCH (ENVELOPE (\"Mon, 19 Oct 2026 20:19:27 +0000\" [literal $subject]" \
+		" NIL NIL NIL NIL NIL NIL NIL \"<a@b>\"))\r\n" \
+	]]
+	json get $res 0 details msg ENVELOPE subject
+} -result "Résumé ’"
+#>>>
+test literals-2.2 {A mailbox name sent as a literal is decoded text} -body { #<<<
+	set name	[encoding convertto utf-8 "RT/Café"]
+	set res	[parse_all "* LIST (\\HasNoChildren) \"/\" [literal $name]\r\n"]
+	json get $res 0 details mailbox
+} -result "RT/Café"
+#>>>
+
+::tcltest::cleanupTests
+return
+
+# vim: ft=tcl foldmethod=marker foldmarker=<<<,>>> ts=4 shiftwidth=4 noexpandtab

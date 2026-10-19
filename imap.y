@@ -78,6 +78,7 @@
 	SIZE
 	STATUS
 	TAG
+	TEXT_SECTION
 	TRYCREATE
 	UID
 	UIDNEXT
@@ -350,16 +351,16 @@ msg_att_item(A) ::= INTERNALDATE json_string(V).									{ STASH(L__KEY,  "INTER
 msg_att_item(A) ::= RFC822_SIZE NUMBER(V).											{ STASH(L__KEY,  "RFC822.SIZE");												MOVE(V, A); }
 msg_att_item(A) ::= BODY body(V).													{ STASH(L__KEY,  "BODYSTRUCTURE");												MOVE(V, A); }
 msg_att_item(A) ::= BODYSTRUCTURE body(V).											{ STASH(L__KEY,  "BODYSTRUCTURE");												MOVE(V, A); }
-msg_att_item(A) ::= BODY section(S) json_nstring(V).								{ STASHF(L__KEY, "BODY[%s]",			Tcl_GetString(S));						MOVE(V, A); }
-msg_att_item(A) ::= BODY section(S) LANGLE NUMBER(O) RANGLE json_nstring(V).		{ STASHF(L__KEY, "BODY[%s]<%s>",		Tcl_GetString(S), Tcl_GetString(O));	MOVE(V, A); }
-msg_att_item(A) ::= BODY_PEEK section(S) json_nstring(V).							{ STASHF(L__KEY, "BODY.PEEK[%s]",		Tcl_GetString(S));						MOVE(V, A); }
-msg_att_item(A) ::= BODY_PEEK section(S) LANGLE NUMBER(O) RANGLE json_nstring(V).	{ STASHF(L__KEY, "BODY.PEEK[%s]<%s>",	Tcl_GetString(S), Tcl_GetString(O));	MOVE(V, A); }
+msg_att_item(A) ::= BODY section(S) json_noctets(V).								{ STASHF(L__KEY, "BODY[%s]",			Tcl_GetString(S));						MOVE(V, A); }
+msg_att_item(A) ::= BODY section(S) LANGLE NUMBER(O) RANGLE json_noctets(V).		{ STASHF(L__KEY, "BODY[%s]<%s>",		Tcl_GetString(S), Tcl_GetString(O));	MOVE(V, A); }
+msg_att_item(A) ::= BODY_PEEK section(S) json_noctets(V).							{ STASHF(L__KEY, "BODY.PEEK[%s]",		Tcl_GetString(S));						MOVE(V, A); }
+msg_att_item(A) ::= BODY_PEEK section(S) LANGLE NUMBER(O) RANGLE json_noctets(V).	{ STASHF(L__KEY, "BODY.PEEK[%s]<%s>",	Tcl_GetString(S), Tcl_GetString(O));	MOVE(V, A); }
 msg_att_item(A) ::= UID NUMBER(V).													{ STASH(L__KEY,  "UID");														MOVE(V, A); }
-msg_att_item(A) ::= RFC822 json_nstring(V).											{ STASH(L__KEY,  "RFC822");														MOVE(V, A); }
-msg_att_item(A) ::= RFC822_HEADER json_nstring(V).									{ STASH(L__KEY,  "RFC822.HEADER");												MOVE(V, A); }
-msg_att_item(A) ::= RFC822_TEXT json_nstring(V).									{ STASH(L__KEY,  "RFC822.TEXT");												MOVE(V, A); }
-msg_att_item(A) ::= BINARY section_binary(S) json_nstring(V).						{ STASHF(L__KEY, "BINARY[%s]",			Tcl_GetString(S));						MOVE(V, A); }
-msg_att_item(A) ::= BINARY_PEEK section_binary(S) json_nstring(V).					{ STASHF(L__KEY, "BINARY.PEEK[%s]",		Tcl_GetString(S));						MOVE(V, A); }
+msg_att_item(A) ::= RFC822 json_noctets(V).											{ STASH(L__KEY,  "RFC822");														MOVE(V, A); }
+msg_att_item(A) ::= RFC822_HEADER json_noctets(V).									{ STASH(L__KEY,  "RFC822.HEADER");												MOVE(V, A); }
+msg_att_item(A) ::= RFC822_TEXT json_noctets(V).									{ STASH(L__KEY,  "RFC822.TEXT");												MOVE(V, A); }
+msg_att_item(A) ::= BINARY section_binary(S) json_noctets(V).						{ STASHF(L__KEY, "BINARY[%s]",			Tcl_GetString(S));						MOVE(V, A); }
+msg_att_item(A) ::= BINARY_PEEK section_binary(S) json_noctets(V).					{ STASHF(L__KEY, "BINARY.PEEK[%s]",		Tcl_GetString(S));						MOVE(V, A); }
 msg_att_item(A) ::= BINARY_SIZE section_binary(S) NUMBER(V).						{ STASHF(L__KEY, "BINARY.SIZE[%s]",		Tcl_GetString(S));						MOVE(V, A); }
 msg_att_item(A) ::= X_GM_MSGID NUMBER(V).											{ STASH(L__KEY,  "X-GM-MSGID");													MOVE(V, A); }
 msg_att_item(A) ::= X_GM_LABELS utf7_astring_list(V).								{ STASH(L__KEY,  "X-GM-LABELS");												MOVE(V, A); }
@@ -383,6 +384,7 @@ section_text(A) ::= section_msgtext(B).						{ MOVE(B, A); }
 section_text(A) ::= MIME.									{ SET(A, "MIME"); }
 
 section_msgtext(A) ::= HEADER(F).							{ SET(A, F); }
+section_msgtext(A) ::= TEXT_SECTION(F).						{ SET(A, F); }
 section_msgtext(A) ::= HEADER_FIELDS(F) header_list(B).		{ SETF(A, "%s %s", Tcl_GetString(F), Tcl_GetString(B)); }
 section_msgtext(A) ::= HEADER_FIELDS_NOT(F) header_list(B).	{ SETF(A, "%s %s", Tcl_GetString(F), Tcl_GetString(B)); }
 
@@ -553,9 +555,26 @@ astring(A) ::= string(B).		{ MOVE(B, A); }
 
 json_astring(A) ::= astring(B).	{ SET(A, JSTR(B)); }
 
+// A literal's data is octets (a bytearray).  As a string it is text, decoded
+// from UTF-8 (Tcl_NewStringObj takes the bytes as they come, as quoted strings
+// do).  A literal8 can hold anything, so it stays octets
 string(A) ::= QUOTED_STRING(B).						{ MOVE(B, A); }
-string(A) ::= LITERAL_HEADER CRLF LITERAL_DATA(B).	{ MOVE(B, A); }
+string(A) ::= LITERAL_HEADER CRLF LITERAL_DATA(B).	{
+	Tcl_Size				len;
+	const unsigned char*	bytes = Tcl_GetBytesFromObj(NULL, B, &len);
+	SET(A, Tcl_NewStringObj((const char*)bytes, len));
+}
 string(A) ::= LITERAL_HEADER CRLF LITERAL8_DATA(B).	{ MOVE(B, A); }
+
+// Message data (BODY[...], BINARY[...], RFC822...): the octets as sent, as a
+// bytearray, whichever form of string carried them
+octets(A) ::= QUOTED_STRING(B).						{
+	Tcl_Size	len;
+	const char*	str = Tcl_GetStringFromObj(B, &len);
+	SET(A, Tcl_NewByteArrayObj((const unsigned char*)str, len));
+}
+octets(A) ::= LITERAL_HEADER CRLF LITERAL_DATA(B).	{ MOVE(B, A); }
+octets(A) ::= LITERAL_HEADER CRLF LITERAL8_DATA(B).	{ MOVE(B, A); }
 
 json_string(A) ::= string(B).	{ SET(A, JSTR(B)); }
 
@@ -564,6 +583,9 @@ json_string(A) ::= string(B).	{ SET(A, JSTR(B)); }
 
 json_nstring(A) ::= string(B).	{ SET(A, JSTR(B)); }
 json_nstring(A) ::= NIL.		{ SET(A, L_JSON_NULL); }
+
+json_noctets(A) ::= octets(B).	{ SET(A, JSTR(B)); }
+json_noctets(A) ::= NIL.		{ SET(A, L_JSON_NULL); }
 
 json_atom(A) ::= atom(B).		{ SET(A, JSTR(B)); }
 
