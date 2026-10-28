@@ -1,0 +1,38 @@
+source [file join [file dirname [info script]] common.tcl]
+
+proc parse_all resp { # Parse the responses in $resp, returning a JSON array of them <<<
+	set res		{[]}
+	set chunk	$resp
+	try {
+		while 1 {
+			json set res end+1 [::jitc_imap::parse_response state $chunk[set chunk {}]]
+		}
+	} trap {JITC_IMAP MORE} {} {}
+	json normalize $res
+}
+
+#>>>
+
+test esearch-1.1 {ESEARCH RETURN (MIN MAX COUNT): Gmail's answer} -body { #<<<
+	json extract [parse_all "* ESEARCH (TAG \"a0004\") UID COUNT 863 MIN 342077 MAX 343042\r\n"] 0 details
+} -result [json normalize {{"tag": "a0004", "uid": true, "results": {"COUNT": 863, "MIN": 342077, "MAX": 343042}}}]
+#>>>
+test esearch-1.2 {ESEARCH RETURN (ALL): the sequence set, as given} -body { #<<<
+	json extract [parse_all "* ESEARCH (TAG \"a0005\") UID ALL 342077:342079,343042\r\n"] 0 details results
+} -result [json normalize {{"ALL": "342077:342079,343042"}}]
+#>>>
+test esearch-1.3 {COUNT, MIN and MAX are still atoms where an atom goes} -body { #<<<
+	json normalize [json template {[
+		"~J:list",
+		"~J:flags"
+	]} [dict create \
+		list	[json extract [parse_all "* LIST (\\HasNoChildren) \"/\" COUNT\r\n"] 0 details mailbox] \
+		flags	[json extract [parse_all "* FLAGS (MIN MAX \\Seen)\r\n"] 0 details] \
+	]]
+} -result [json normalize {["COUNT", ["MIN", "MAX", "\\Seen"]]}]
+#>>>
+
+::tcltest::cleanupTests
+return
+
+# vim: ft=tcl foldmethod=marker foldmarker=<<<,>>> ts=4 shiftwidth=4 noexpandtab

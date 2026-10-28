@@ -34,8 +34,8 @@ clean:
 	-rm -f $(TESTLIB)
 
 install:
-	mkdir -p $(DESTDIR)$(PREFIX)/lib/jitc_imap0.3
-	cp lempar.c tcllemon.c imap.re imap.tcl imap.y pkgIndex.tcl $(DESTDIR)$(PREFIX)/lib/jitc_imap0.3/
+	mkdir -p $(DESTDIR)$(PREFIX)/lib/jitc_imap0.3.1
+	cp lempar.c tcllemon.c imap.re imap.tcl imap.y pkgIndex.tcl $(DESTDIR)$(PREFIX)/lib/jitc_imap0.3.1/
 
 tags:
 	ctags-exuberant --langmap=c:+.re *

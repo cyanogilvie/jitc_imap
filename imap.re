@@ -154,6 +154,7 @@ void breakpoint() {};
 	X(TOK_CONTACTADMIN,			"CONTACTADMIN") \
 	X(TOK_COPYUID,				"COPYUID") \
 	X(TOK_CORRUPTION,			"CORRUPTION") \
+	X(TOK_COUNT,				"COUNT") \
 	X(TOK_DELETED,				"DELETED") \
 	X(TOK_ENABLED,				"ENABLED") \
 	X(TOK_ENVELOPE,				"ENVELOPE") \
@@ -172,8 +173,10 @@ void breakpoint() {};
 	X(TOK_INUSE,				"INUSE") \
 	X(TOK_LIMIT,				"LIMIT") \
 	X(TOK_LIST,					"LIST") \
+	X(TOK_MAX,					"MAX") \
 	X(TOK_MESSAGES,				"MESSAGES") \
 	X(TOK_MIME,					"MIME") \
+	X(TOK_MIN,					"MIN") \
 	X(TOK_NAMESPACE,			"NAMESPACE") \
 	X(TOK_NIL,					"NIL") \
 	X(TOK_NONEXISTENT,			"NONEXISTENT") \
@@ -1114,6 +1117,7 @@ OBJCMD(parse_response) //<<<
 		<plain>	'CONTACTADMIN'			=> post	{ EMIT(CONTACTADMIN,			lit[L_TOK_CONTACTADMIN]);			continue; }
 		<plain>	'COPYUID'				=> post	{ EMIT(COPYUID,					lit[L_TOK_COPYUID]);				continue; }
 		<plain>	'CORRUPTION'			=> post	{ EMIT(CORRUPTION,				lit[L_TOK_CORRUPTION]);				continue; }
+		<plain>	'COUNT'					=> post	{ EMIT(COUNT,					lit[L_TOK_COUNT]);					continue; }
 		<plain>	'DELETED'				=> post	{ EMIT(DELETED,					lit[L_TOK_DELETED]);				continue; }
 		<plain>	'ENABLED'				=> post	{ EMIT(ENABLED,					lit[L_TOK_ENABLED]);				continue; }
 		<plain>	'ENVELOPE'				=> post	{ EMIT(ENVELOPE,				lit[L_TOK_ENVELOPE]);				continue; }
@@ -1137,8 +1141,10 @@ OBJCMD(parse_response) //<<<
 		<plain>	'LIMIT'					=> post	{ EMIT(LIMIT,					lit[L_TOK_LIMIT]);					continue; }
 		<plain>	'LIST'					=> post	{ EMIT(LIST,					lit[L_TOK_LIST]);					continue; }
 //		<plain>	'LSUB'					=> post	{ EMIT(LSUB,					lit[L_TOK_LSUB]);					continue; }
+		<plain>	'MAX'					=> post	{ EMIT(MAX,						lit[L_TOK_MAX]);					continue; }
 		<plain>	'MESSAGES'				=> post	{ EMIT(MESSAGES,				lit[L_TOK_MESSAGES]);				continue; }
 		<plain>	'MIME'					=> post	{ EMIT(MIME,					lit[L_TOK_MIME]);					continue; }
+		<plain>	'MIN'					=> post	{ EMIT(MIN,						lit[L_TOK_MIN]);					continue; }
 		<plain>	'NAMESPACE'				=> post	{ EMIT(NAMESPACE,				lit[L_TOK_NAMESPACE]);				continue; }
 		<plain>	'NIL'					=> post	{ EMIT(NIL,						lit[L_TOK_NIL]);					continue; }
 		<plain>	'NO'					=> post	{ EMIT(NO,						lit[L_TOK_NO]);						continue; }

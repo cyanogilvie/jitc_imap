@@ -4,7 +4,7 @@ if {[catch {package present jitc_imap}]} {
 	puts stderr "[file tail [info script]] loading dev packages from $srcdir"
 
 	source [file join $srcdir imap.tcl]
-	package provide jitc_imap 0.3
+	package provide jitc_imap 0.3.1
 
 	if {[file readable libtcllemon.so]} {
 		load [file join $srcdir libtcllemon.so] Tcllemon
